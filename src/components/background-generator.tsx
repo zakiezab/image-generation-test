@@ -119,8 +119,8 @@ export function BackgroundGenerator() {
                   onClick={() => setSelectedBackgroundUrl(img.url)}
                   className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                     selectedBackgroundUrl === img.url
-                      ? "border-emerald-500 ring-2 ring-emerald-200"
-                      : "border-zinc-200 hover:border-zinc-300"
+                      ? "border-primary ring-2 ring-primary-100"
+                      : "border-gray-200 hover:border-secondary-300"
                   }`}
                 >
                   <img

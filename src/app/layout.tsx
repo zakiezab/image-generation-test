@@ -1,17 +1,26 @@
 import type { Metadata } from "next";
-import { Libre_Franklin } from "next/font/google";
+import { Libre_Franklin, Metrophobic } from "next/font/google";
+import { HeaderNav } from "@/components/header-nav";
 import "./globals.css";
 
 const libreFranklin = Libre_Franklin({
   variable: "--font-libre-franklin",
   subsets: ["latin"],
   display: "swap",
+  weight: ["300", "400", "500", "600"],
+});
+
+const metrophobic = Metrophobic({
+  variable: "--font-metrophobic",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "AI Hero Visual Generator | Brand-Compliant Image Creator",
+  title: "Mobiz | AI Hero Visual & Storyline Studio",
   description:
-    "Generate AI hero backgrounds, add your logo and text, and export production-ready 1080×1080 PNG images.",
+    "Strategy, Executed. Generate AI hero visuals and scene-by-scene storylines with brand-compliant design.",
 };
 
 export default function RootLayout({
@@ -21,7 +30,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${libreFranklin.variable} font-sans antialiased`}>
+      <body className={`${libreFranklin.variable} ${metrophobic.variable} font-sans antialiased`}>
+        <HeaderNav />
         {children}
       </body>
     </html>

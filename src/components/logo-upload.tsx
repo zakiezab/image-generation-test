@@ -94,7 +94,7 @@ export function LogoUpload() {
             </Button>
             <Link
               href="/logo"
-              className="inline-flex h-8 items-center justify-center rounded-lg border border-zinc-300 bg-transparent px-3 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
+              className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-foreground transition-colors hover:bg-(--gray-100) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Choose from library
             </Link>
@@ -108,7 +108,7 @@ export function LogoUpload() {
                       applyLogoDefaults(setLogoUrl, setLogoPosition, setLogoScale, setLogoPadding, url)
                     }
                     className={`w-12 h-12 rounded border-2 overflow-hidden shrink-0 ${
-                      logoUrl === url ? "border-emerald-500" : "border-zinc-200"
+                      logoUrl === url ? "border-primary" : "border-(--gray-200)"
                     }`}
                   >
                     <img src={url} alt="Logo" className="w-full h-full object-contain" />
@@ -123,7 +123,7 @@ export function LogoUpload() {
           <>
             <div>
               <Label className="mb-1 block">Position</Label>
-              <p className="mb-2 text-xs text-zinc-500">Where the logo sits on the canvas (e.g. top-left, bottom-right).</p>
+              <p className="mb-2 text-xs text-gray-500">Where the logo sits on the canvas (e.g. top-left, bottom-right).</p>
               <div className="grid grid-cols-4 gap-2">
                 {BRAND.positions.map((pos) => (
                   <Button
@@ -142,8 +142,8 @@ export function LogoUpload() {
               <Label htmlFor="scale" className="block mb-1">
                 Scale
               </Label>
-              <p className="mb-1 text-xs text-zinc-500">Logo size multiplier (0.5x–2x). Default: 1.5x.</p>
-              <p className="mb-1 text-sm font-medium text-zinc-700">{logoScale.toFixed(1)}x</p>
+              <p className="mb-1 text-xs text-gray-500">Logo size multiplier (0.5x–2x). Default: 1.5x.</p>
+              <p className="mb-1 text-sm font-medium text-secondary-100">{logoScale.toFixed(1)}x</p>
               <input
                 id="scale"
                 type="range"
@@ -160,8 +160,8 @@ export function LogoUpload() {
               <Label htmlFor="padding" className="block mb-1">
                 Padding
               </Label>
-              <p className="mb-1 text-xs text-zinc-500">Distance from the canvas edge in pixels. Default: 52px.</p>
-              <p className="mb-1 text-sm font-medium text-zinc-700">{logoPadding}px</p>
+              <p className="mb-1 text-xs text-gray-500">Distance from the canvas edge in pixels. Default: 52px.</p>
+              <p className="mb-1 text-sm font-medium text-secondary-100">{logoPadding}px</p>
               <input
                 id="padding"
                 type="range"

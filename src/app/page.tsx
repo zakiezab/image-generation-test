@@ -6,20 +6,19 @@ import { ExportButton } from "@/components/export-button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-zinc-900">
-            AI Hero Visual Generator
-          </h1>
-          <p className="mt-1 text-sm text-zinc-600">
+    <div className="min-h-screen bg-background">
+      <section className="border-b border-gray-200 bg-primary-100 py-8">
+        <div className="mx-auto max-w-(--max-w-container) px-4 md:px-16 2xl:px-6">
+          <p className="section-label">Hero Visual</p>
+          <h1 className="section-title mt-1">AI Hero Visual Generator</h1>
+          <p className="section-description mt-2">
             Generate brand-compliant hero images with AI backgrounds, logos, and
             text. Export production-ready 1080×1080 PNG.
           </p>
         </div>
-      </header>
+      </section>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-(--max-w-content) px-4 py-4 md:px-16 2xl:px-6">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           {/* Left: Controls */}
           <div className="space-y-6">
@@ -33,8 +32,8 @@ export default function Home() {
 
           {/* Right: Preview */}
           <div className="lg:sticky lg:top-8 lg:self-start">
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-900">
+            <div className="rounded-3xl border border-(--gray-200) bg-(--gray-100) p-6 shadow-sm transition-all duration-300 hover:bg-(--gray-50) md:p-8">
+              <h2 className="mb-4 font-display text-lg font-semibold text-foreground">
                 Live Preview
               </h2>
               <PreviewCanvas />

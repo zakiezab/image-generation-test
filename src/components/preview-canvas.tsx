@@ -62,7 +62,7 @@ export function PreviewCanvas() {
     const scale = CANVAS_SIZE / EXPORT_SIZE;
 
     // Clear
-    ctx.fillStyle = "#121212";
+    ctx.fillStyle = "#fafafa";
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     // Background
@@ -93,27 +93,28 @@ export function PreviewCanvas() {
       ctx.drawImage(logoImage, x, y, w, h);
     }
 
-    // Title & Description: middle-left, vertically centered block
-    const textPad = BRAND.titleDescriptionPadding * scale;
-    const titleLineHeight = BRAND.titleSize * scale;
-    const descLineHeight = BRAND.descriptionSize * scale * 1.3;
-    const gap = 50 * scale;
-    const blockHeight = titleLineHeight + gap + descLineHeight;
-    const blockTopY = (CANVAS_SIZE - blockHeight) / 2;
+    // Title & Description: middle-left, vertically centered block (when there is content)
+      const textPad = BRAND.titleDescriptionPadding * scale;
+      const titleLineHeight = BRAND.titleSize * scale;
+      const descLineHeight = BRAND.descriptionSize * scale * 1.3;
+      const gap = 50 * scale;
+      const blockHeight = titleLineHeight + gap + descLineHeight;
+      const blockTopY = (CANVAS_SIZE - blockHeight) / 2;
 
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
 
-    const maxTextWidth = CANVAS_SIZE - textPad * 2;
+      const maxTextWidth = CANVAS_SIZE - textPad * 2;
 
-    ctx.font = `600 ${BRAND.titleSize * scale}px "Libre Franklin", sans-serif`;
-    ctx.fillStyle = "white";
-    let y = drawMultilineText(ctx, title, textPad, blockTopY, maxTextWidth, titleLineHeight);
+      ctx.font = `600 ${BRAND.titleSize * scale}px "Libre Franklin", sans-serif`;
+      ctx.fillStyle = "#1a1a1a";
+      let y = drawMultilineText(ctx, title, textPad, blockTopY, maxTextWidth, titleLineHeight);
 
-    y += gap;
-    ctx.font = `${BRAND.descriptionSize * scale}px "Libre Franklin", sans-serif`;
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    drawMultilineText(ctx, description, textPad, y, maxTextWidth, descLineHeight);
+      y += gap;
+      ctx.font = `${BRAND.descriptionSize * scale}px "Libre Franklin", sans-serif`;
+      ctx.fillStyle = "rgba(26,26,26,0.85)";
+      drawMultilineText(ctx, description, textPad, y, maxTextWidth, descLineHeight);
+
   }, [
     bgImage,
     logoImage,
@@ -124,17 +125,31 @@ export function PreviewCanvas() {
     description,
   ]);
 
+  const isEmpty =
+    !selectedBackgroundUrl &&
+    !logoUrl &&
+    !title.trim() &&
+    !description.trim();
+
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="rounded-xl overflow-hidden border-2 border-zinc-200 shadow-lg bg-zinc-100">
+      <div className="relative rounded-xl overflow-hidden border-2 border-(--gray-200) shadow-lg bg-(--gray-100)">
         <canvas
           ref={canvasRef}
           width={CANVAS_SIZE}
           height={CANVAS_SIZE}
           className="block"
         />
+        {isEmpty && (
+          <div
+            className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-gray-400"
+            aria-hidden
+          >
+            Your hero visual will appear here
+          </div>
+        )}
       </div>
-      <p className="text-xs text-zinc-500">Live preview • Export: 1080×1080</p>
+      <p className="text-xs text-gray-500">Live preview • Export: 1080×1080</p>
     </div>
   );
 }

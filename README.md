@@ -4,12 +4,19 @@ A brand-compliant platform for generating AI hero visuals. Create backgrounds wi
 
 ## Features
 
-- **AI Background Generation** – Describe your hero visual, generate with OpenAI DALL-E (or placeholder when no API key)
-- **Logo Upload & Placement** – Upload logos, position (top-left, top-right, bottom-left, bottom-right), scale, and padding
+### Hero Visual (default)
+- **AI Background Generation** – Describe your hero visual, generate with Google Imagen / OpenAI DALL-E (or placeholder)
+- **Logo Upload & Placement** – Upload logos, position, scale, and padding
 - **Title & Description** – Manual input or AI-generated copy
 - **Brand Enforcement** – Libre Franklin font, locked sizes, layout, and padding
 - **Live Preview** – Real-time canvas updates
 - **Export** – Server-side 1080×1080 PNG via Sharp
+
+### Storyline Studio
+- **Scene-by-scene product demo scripts** – Start from a voiceover script (paste or upload file), build from scratch (Why / How / What), or upload a screen recording video
+- **Per-scene fields** – Title, description, voiceover script, suggested visuals, summary
+- **Generate visuals** – Use existing Google AI (Imagen) to generate an image per scene
+- **Re-generate with comments** – Refine any scene with feedback; supports Claude, Gemini, or OpenAI for text
 
 ## Tech Stack
 
@@ -35,9 +42,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_API_KEY` | OpenAI API key for DALL-E image generation and GPT text generation |
+| `GOOGLE_AI_API_KEY` | Google AI: Imagen (hero images), Gemini (storyline text + hero title/description) |
+| `ANTHROPIC_API_KEY` | Claude: storyline scene generation (tried first for Storyline Studio) |
+| `OPENAI_API_KEY` | OpenAI: DALL-E images, GPT for title/description and storyline fallback |
 
-Without `OPENAI_API_KEY`, the app uses placeholder images (picsum.photos) and fallback text.
+Storyline Studio tries **Claude** first, then **Gemini**, then **OpenAI** for scene generation. Scene visuals use the same image API (Google Imagen when `GOOGLE_AI_API_KEY` is set). For **screen recording**, `GOOGLE_AI_API_KEY` is required (Gemini analyzes the video).
+
+### Storage (MVP)
+
+No persistent file storage is used. Voiceover script files are read in the browser only. Uploaded screen recordings are written to a temp file, sent to Gemini for analysis, then the temp file is deleted. If you later need to keep recordings or scripts, you can add S3/Cloudinary (or similar).
 
 ## Project Structure
 
@@ -47,6 +60,7 @@ src/
 │   ├── api/
 │   │   ├── generate-image/   # AI background generation
 │   │   ├── generate-text/    # AI title/description
+│   │   ├── storyline/       # generate, regenerate-scene
 │   │   ├── upload/           # Logo upload
 │   │   └── export/           # PNG export
 │   ├── layout.tsx

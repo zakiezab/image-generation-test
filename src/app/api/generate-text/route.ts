@@ -70,7 +70,7 @@ When asked for both, reply with exactly two lines: first line "Title: <title>", 
         : `Generate a short description (1-2 sentences) for:\n\n${context}`;
 
   const res = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     contents: `${systemPrompt}\n\n${userPrompt}`,
     config: { maxOutputTokens: 150 },
   });
