@@ -6,6 +6,18 @@ import { BRAND } from "@/lib/brand";
  * Server-side PNG export
  * Composes background, logo, title, description into 1080x1080 PNG
  */
+/** Resolve relative URLs (e.g. /logo/foo.png) to absolute so server fetch works. */
+function resolveUrl(url: string, request: NextRequest): string {
+  if (url.startsWith("data:") || url.startsWith("blob:") || url.startsWith("http")) {
+    return url;
+  }
+  if (url.startsWith("/")) {
+    const origin = new URL(request.url).origin;
+    return `${origin}${url}`;
+  }
+  return url;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { backgroundUrl, logoUrl, logoPosition, logoScale, logoPadding, title, description } =
@@ -24,13 +36,28 @@ export async function POST(request: NextRequest) {
     });
 
     if (backgroundUrl) {
+      if (backgroundUrl.startsWith("blob:")) {
+        return NextResponse.json(
+          { error: "Background image is not available for export. Generate a new background and try again." },
+          { status: 400 }
+        );
+      }
       let bgBuffer: Buffer;
       if (backgroundUrl.startsWith("data:")) {
         const base64 = backgroundUrl.split(",")[1];
         bgBuffer = Buffer.from(base64 || "", "base64");
       } else {
-        const arrBuf = await fetch(backgroundUrl).then((r) => r.arrayBuffer());
-        bgBuffer = Buffer.from(new Uint8Array(arrBuf));
+        try {
+          const url = resolveUrl(backgroundUrl, request);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`Background fetch: ${res.status}`);
+          const arrBuf = await res.arrayBuffer();
+          bgBuffer = Buffer.from(new Uint8Array(arrBuf));
+        } catch (e) {
+          throw new Error(
+            "Could not load background image. If you used a placeholder, generate a new image first."
+          );
+        }
       }
       const bgImage = sharp(bgBuffer).resize(size, size, { fit: "cover" });
       base = sharp(await bgImage.toBuffer());
@@ -40,13 +67,26 @@ export async function POST(request: NextRequest) {
 
     // Add logo if present
     if (logoUrl) {
+      if (logoUrl.startsWith("blob:")) {
+        return NextResponse.json(
+          { error: "Logo is not available for export. Re-upload the logo and try again." },
+          { status: 400 }
+        );
+      }
       let logoBuffer: Buffer;
       if (logoUrl.startsWith("data:")) {
         const base64 = logoUrl.split(",")[1];
         logoBuffer = Buffer.from(base64 || "", "base64");
       } else {
-        const arrBuf = await fetch(logoUrl).then((r) => r.arrayBuffer());
-        logoBuffer = Buffer.from(new Uint8Array(arrBuf));
+        try {
+          const url = resolveUrl(logoUrl, request);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`Logo fetch: ${res.status}`);
+          const arrBuf = await res.arrayBuffer();
+          logoBuffer = Buffer.from(new Uint8Array(arrBuf));
+        } catch (e) {
+          throw new Error("Could not load logo image. Re-upload the logo and try again.");
+        }
       }
       const logoMeta = await sharp(logoBuffer).metadata();
       const logoW = Math.min(
@@ -54,7 +94,7 @@ export async function POST(request: NextRequest) {
         BRAND.logoMaxWidth
       );
       const logoH = (logoMeta.height || 50) * logoScale * (logoW / (logoMeta.width || 100));
-      const pad = logoPadding;
+      const pad = typeof logoPadding === "number" ? logoPadding : BRAND.logoPadding;
 
       const positions: Record<string, { x: number; y: number }> = {
         "top-left": { x: pad, y: pad },
@@ -92,7 +132,7 @@ export async function POST(request: NextRequest) {
       }
       svgParts.push(`
         <text x="${textPad}" y="${lineY}" 
-          font-family="${BRAND.fontFamily}" font-size="${BRAND.titleSize}" 
+          font-family="Arial, sans-serif" font-size="${BRAND.titleSize}" 
           font-weight="600" fill="white" dominant-baseline="hanging" text-anchor="start">${escapeXml(line.trim())}</text>
       `);
       lineY += titleLineHeight;
@@ -105,7 +145,7 @@ export async function POST(request: NextRequest) {
       }
       svgParts.push(`
         <text x="${textPad}" y="${lineY}" 
-          font-family="${BRAND.fontFamily}" font-size="${BRAND.descriptionSize}" 
+          font-family="Arial, sans-serif" font-size="${BRAND.descriptionSize}" 
           fill="rgba(255,255,255,0.85)" dominant-baseline="hanging" text-anchor="start">${escapeXml(line.trim())}</text>
       `);
       lineY += descLineHeight;
@@ -132,10 +172,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Export error:", error);
-    return NextResponse.json(
-      { error: "Failed to export image" },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Failed to export image";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

@@ -33,7 +33,13 @@ export function ExportButton() {
         }),
       });
 
-      if (!res.ok) throw new Error("Export failed");
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const errBody = contentType.includes("application/json")
+          ? await res.json().then((d: { error?: string }) => d.error)
+          : await res.text();
+        throw new Error(typeof errBody === "string" ? errBody : errBody || "Export failed");
+      }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -44,6 +50,8 @@ export function ExportButton() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Export failed";
+      alert(message);
     } finally {
       setIsExporting(false);
     }
