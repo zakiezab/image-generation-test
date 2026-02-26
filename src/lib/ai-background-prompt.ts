@@ -5,7 +5,7 @@
 export const AI_BACKGROUND_SYSTEM_PROMPT = `STYLE & PERSPECTIVE:
 Isometric 3D illustration, classic isometric projection at 30° elevation and 45° azimuth rotation. Objects anchored to the bottom-right corner of a square canvas, slightly cropped at the edges, leaving the upper-left two-thirds as open negative space. Corporate tech editorial style — similar to Notion, AWS, or ServiceNow marketing illustration style.
 BACKGROUND:
-Deep space gradient background — not white or transparent. Dark navy blue (#0D0B2B) in the top-left fading into rich violet-purple (#3B2A8C) toward the center and bottom-right. Two subtle circular light bloom shapes in the top-right corner area, slightly lighter than the background, suggesting ambient light sources. No hard edges on background.
+Deep space gradient full screen background — not white or transparent. Dark navy blue (#0D0B2B) in the top-left fading into rich violet-purple (#3B2A8C) toward the center and bottom-right. Two subtle circular light bloom shapes in the top-right corner area, slightly lighter than the background, suggesting ambient light sources. No hard edges on background. No glow or starry objects on background.
 OBJECT STYLE:
 Flat-face isometric volumes with smooth color fills — no photorealistic textures or gradients. Edges defined by color value contrast between faces (top face lightest, left face mid-tone, right face darkest), not by black outlines. Very thin, subtle inner edge highlight (1px off-white) on top edges of objects to suggest sharpness. Clean geometric primitives: boxes, cylinders, rounded rectangles in isometric space. Rounded corners on all major volumes (corner radius proportional to object size).
 COLOR PALETTE:
@@ -17,6 +17,6 @@ Main object cluster occupies roughly the bottom 50% and right 50% of the canvas.
 LIGHTING:
 Primary light source: top-center, slightly left. Top faces receive the most light (near-white or light tint of object color). Side faces in shadow — use darker shades from the same color family, not black. No cast shadows from objects onto background — only a faint elliptical drop shadow directly beneath.
 WHAT TO AVOID:
-No photorealistic materials, lens flares, or 3D render noise. No heavy black outlines or cartoon-style stroke borders. No centered composition — keep objects to one corner. No white or transparent backgrounds. No text or labels within the illustration.
+No photorealistic materials, lens flares, or 3D render noise. No glow or starry objects. No heavy black outlines or cartoon-style stroke borders. No centered composition — keep objects to one corner. No white or transparent backgrounds. No text or labels within the illustration.
 
 Subject and content to depict: `;

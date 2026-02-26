@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import Link from "next/link";
 import { useHeroStore } from "@/store/hero-store";
 import { BRAND } from "@/lib/brand";
+import { LOGO_OPTIONS } from "@/lib/logo-options";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +27,6 @@ function applyLogoDefaults(
 }
 
 export function LogoUpload() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     logoUrl,
     setLogoUrl,
@@ -38,36 +36,8 @@ export function LogoUpload() {
     setLogoScale,
     logoPadding,
     setLogoPadding,
-    mediaLibrary,
     addToMediaLibrary,
   } = useHeroStore();
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
-      try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: dataUrl }),
-        });
-        if (res.ok) {
-          const { url } = await res.json();
-          applyLogoDefaults(setLogoUrl, setLogoPosition, setLogoScale, setLogoPadding, url);
-          addToMediaLibrary(url);
-        }
-      } catch {
-        applyLogoDefaults(setLogoUrl, setLogoPosition, setLogoScale, setLogoPadding, dataUrl);
-        addToMediaLibrary(dataUrl);
-      }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
 
   return (
     <Card>
@@ -76,46 +46,26 @@ export function LogoUpload() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label className="mb-2 block">Upload or select</Label>
-          <div className="flex gap-2 flex-wrap">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Upload Logo
-            </Button>
-            <Link
-              href="/logo"
-              className="inline-flex h-8 items-center justify-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-foreground transition-colors hover:bg-(--gray-100) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-            >
-              Choose from library
-            </Link>
-            {mediaLibrary.length > 0 && (
-              <div className="flex gap-1 flex-wrap">
-                {mediaLibrary.map((url) => (
-                  <button
-                    key={url.slice(0, 50)}
-                    type="button"
-                    onClick={() =>
-                      applyLogoDefaults(setLogoUrl, setLogoPosition, setLogoScale, setLogoPadding, url)
-                    }
-                    className={`w-12 h-12 rounded border-2 overflow-hidden shrink-0 ${
-                      logoUrl === url ? "border-primary" : "border-(--gray-200)"
-                    }`}
-                  >
-                    <img src={url} alt="Logo" className="w-full h-full object-contain" />
-                  </button>
-                ))}
-              </div>
-            )}
+          <Label className="mb-2 block">Select logo</Label>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {LOGO_OPTIONS.map((logo) => (
+              <button
+                key={logo.id}
+                type="button"
+                onClick={() => {
+                  applyLogoDefaults(setLogoUrl, setLogoPosition, setLogoScale, setLogoPadding, logo.path);
+                  addToMediaLibrary(logo.path);
+                }}
+                className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-2 transition-all ${
+                  logoUrl === logo.path ? "border-primary ring-2 ring-primary-100" : "border-(--gray-200) hover:border-secondary-300"
+                }`}
+              >
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded">
+                  <img src={logo.path} alt={logo.name} className="max-h-full max-w-full object-contain" />
+                </div>
+                <span className="text-xs font-medium text-secondary-100">{logo.name}</span>
+              </button>
+            ))}
           </div>
         </div>
 

@@ -18,6 +18,7 @@ export function BackgroundGenerator() {
     selectedBackgroundUrl,
     isGenerating,
     setIsGenerating,
+    setBackgroundError,
   } = useHeroStore();
 
   const handleUseGuideline = (guidelinePrompt: string) => {
@@ -28,6 +29,7 @@ export function BackgroundGenerator() {
     if (!prompt.trim()) return;
     setIsGenerating(true);
     setGeneratedImages([]);
+    setBackgroundError(null);
 
     try {
       const res = await fetch("/api/generate-image", {
@@ -40,14 +42,24 @@ export function BackgroundGenerator() {
         url?: string;
         error?: string;
         fallback?: string;
+        engine?: string;
       };
       if (!res.ok) {
-        throw new Error(data.error || "Generation failed");
+        setBackgroundError(data.error || "Generation failed");
+        return;
       }
 
-      const { url, fallback } = data;
-      if (!url) throw new Error("No image URL in response");
+      const { url, error } = data;
+      if (error && !url) {
+        setBackgroundError(error);
+        return;
+      }
+      if (!url) {
+        setBackgroundError("No image URL in response");
+        return;
+      }
 
+      setBackgroundError(null);
       const newImage = {
         id: uuidv4(),
         url,
@@ -55,13 +67,11 @@ export function BackgroundGenerator() {
       };
       setGeneratedImages([newImage]);
       setSelectedBackgroundUrl(url);
-      if (fallback) {
-        console.info(fallback);
-      }
+      if (data.fallback) console.info(data.fallback);
     } catch (err) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Generation failed";
-      alert(message);
+      setBackgroundError(message);
     } finally {
       setIsGenerating(false);
     }

@@ -13,6 +13,7 @@ export interface HeroState {
   generatedImages: GeneratedImage[];
   selectedBackgroundUrl: string | null;
   isGenerating: boolean;
+  backgroundError: string | null;
 
   // Logo
   logoUrl: string | null;
@@ -34,6 +35,7 @@ export interface HeroState {
   addGeneratedImage: (image: GeneratedImage) => void;
   setSelectedBackgroundUrl: (url: string | null) => void;
   setIsGenerating: (value: boolean) => void;
+  setBackgroundError: (error: string | null) => void;
 
   setLogoUrl: (url: string | null) => void;
   setLogoPosition: (position: LogoPosition) => void;
@@ -55,6 +57,7 @@ const initialState = {
   generatedImages: [],
   selectedBackgroundUrl: null as string | null,
   isGenerating: false,
+  backgroundError: null as string | null,
 
   logoUrl: null as string | null,
   logoPosition: "bottom-right" as LogoPosition,
@@ -79,6 +82,7 @@ export const useHeroStore = create<HeroState>((set) => ({
     })),
   setSelectedBackgroundUrl: (selectedBackgroundUrl) => set({ selectedBackgroundUrl }),
   setIsGenerating: (isGenerating) => set({ isGenerating }),
+  setBackgroundError: (backgroundError) => set({ backgroundError }),
 
   setLogoUrl: (logoUrl) => set({ logoUrl }),
   setLogoPosition: (logoPosition) => set({ logoPosition }),

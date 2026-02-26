@@ -5,7 +5,7 @@ import { SCENE_IMAGE_SYSTEM_PROMPT } from "@/lib/scene-image-prompt";
 
 /**
  * AI Image Generation API
- * Supports: Google AI (Imagen), OpenAI DALL-E, or placeholder
+ * Uses Google AI (Imagen) when GOOGLE_AI_API_KEY is set.
  * Optional: aspectRatio ("1:1" | "16:9"), context ("hero" | "storyline") for scene visuals.
  */
 export async function POST(request: NextRequest) {
@@ -24,41 +24,38 @@ export async function POST(request: NextRequest) {
     const fullPrompt = systemPrompt + prompt.trim();
     const ratio = isStoryline ? "16:9" : (aspectRatio === "16:9" ? "16:9" : "1:1");
 
-    // Prefer Google AI (Imagen) when GOOGLE_AI_API_KEY is set
-    const googleKey = process.env.GOOGLE_AI_API_KEY;
-    if (googleKey) {
-      try {
-        const imageUrl = await generateWithGoogleAI(fullPrompt, googleKey, ratio);
-        return NextResponse.json({ url: imageUrl, engine: "google" });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes("billed users") || msg.includes("billing")) {
-          const placeholderUrl = await getPlaceholderImage(fullPrompt, ratio);
-          return NextResponse.json({
-            url: placeholderUrl,
-            engine: "placeholder",
-            fallback: "Google Imagen requires billing. Using placeholder.",
-          });
-        }
-        throw err;
+    const googleKey = process.env.GOOGLE_AI_API_KEY?.trim();
+    if (!googleKey) {
+      console.info("[generate-image] No GOOGLE_AI_API_KEY set.");
+      return NextResponse.json({
+        error: "Add GOOGLE_AI_API_KEY to .env.local and restart the dev server.",
+      });
+    }
+
+    try {
+      const imageUrl = await generateWithGoogleAI(fullPrompt, googleKey, ratio);
+      return NextResponse.json({ url: imageUrl, engine: "google" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[generate-image] Google AI failed:", msg);
+      if (msg.includes("billed users") || msg.includes("billing") || msg.includes("only accessible to billed")) {
+        return NextResponse.json({
+          error: "Imagen is only available to billed Google Cloud accounts. Enable billing in Google AI Studio (aistudio.google.com).",
+        });
       }
+      throw err;
     }
-
-    // Fallback: OpenAI
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (openaiKey) {
-      const imageUrl = await generateWithOpenAI(fullPrompt, openaiKey, ratio);
-      return NextResponse.json({ url: imageUrl, engine: "openai" });
-    }
-
-    // No API key: placeholder for demo
-    const placeholderUrl = await getPlaceholderImage(fullPrompt, ratio);
-    return NextResponse.json({ url: placeholderUrl, engine: "placeholder" });
   } catch (error) {
     console.error("Image generation error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to generate image";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const hint = !process.env.GOOGLE_AI_API_KEY?.trim()
+      ? " Add GOOGLE_AI_API_KEY to .env.local for AI images."
+      : "";
+    return NextResponse.json(
+      { error: message + hint },
+      { status: 500 }
+    );
   }
 }
 
@@ -92,37 +89,6 @@ async function generateWithGoogleAI(
   }
 
   return `data:image/png;base64,${imageBytes}`;
-}
-
-async function generateWithOpenAI(
-  fullPrompt: string,
-  apiKey: string,
-  aspectRatio: string = "1:1"
-): Promise<string> {
-  const size = aspectRatio === "16:9" ? "1792x1024" : "1024x1024";
-  const response = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "dall-e-3",
-      prompt: fullPrompt,
-      n: 1,
-      size,
-      response_format: "url",
-      quality: "hd",
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`OpenAI API error: ${err}`);
-  }
-
-  const data = (await response.json()) as { data: { url: string }[] };
-  return data.data[0].url;
 }
 
 async function getPlaceholderImage(

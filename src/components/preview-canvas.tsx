@@ -17,6 +17,7 @@ export function PreviewCanvas() {
     logoPadding,
     title,
     description,
+    backgroundError,
   } = useHeroStore();
 
   const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
@@ -61,60 +62,68 @@ export function PreviewCanvas() {
 
     const scale = CANVAS_SIZE / EXPORT_SIZE;
 
-    // Clear
-    ctx.fillStyle = "#fafafa";
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    const draw = () => {
+      // Clear
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // Background
-    if (bgImage) {
-      ctx.drawImage(bgImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    }
-
-    // Logo
-    if (logoImage) {
-      const maxW = BRAND.logoMaxWidth * scale * logoScale;
-      const maxH = BRAND.logoMaxHeight * scale * logoScale;
-      const aspect = logoImage.width / logoImage.height;
-      let w = maxW;
-      let h = maxW / aspect;
-      if (h > maxH) {
-        h = maxH;
-        w = maxH * aspect;
+      // Background
+      if (bgImage) {
+        ctx.drawImage(bgImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
       }
-      const pad = logoPadding * scale;
 
-      const positions: Record<string, [number, number]> = {
-        "top-left": [pad, pad],
-        "top-right": [CANVAS_SIZE - w - pad, pad],
-        "bottom-left": [pad, CANVAS_SIZE - h - pad],
-        "bottom-right": [CANVAS_SIZE - w - pad, CANVAS_SIZE - h - pad],
-      };
-      const [x, y] = positions[logoPosition] || positions["bottom-right"];
-      ctx.drawImage(logoImage, x, y, w, h);
-    }
+      // Logo
+      if (logoImage) {
+        const maxW = BRAND.logoMaxWidth * scale * logoScale;
+        const maxH = BRAND.logoMaxHeight * scale * logoScale;
+        const aspect = logoImage.width / logoImage.height;
+        let w = maxW;
+        let h = maxW / aspect;
+        if (h > maxH) {
+          h = maxH;
+          w = maxH * aspect;
+        }
+        const pad = logoPadding * scale;
 
-    // Title & Description: middle-left, vertically centered block (when there is content)
+        const positions: Record<string, [number, number]> = {
+          "top-left": [pad, pad],
+          "top-right": [CANVAS_SIZE - w - pad, pad],
+          "bottom-left": [pad, CANVAS_SIZE - h - pad],
+          "bottom-right": [CANVAS_SIZE - w - pad, CANVAS_SIZE - h - pad],
+        };
+        const [x, y] = positions[logoPosition] || positions["bottom-right"];
+        ctx.drawImage(logoImage, x, y, w, h);
+      }
+
+      // Title & Description: title 313px from top (export coords), 64px gap (export coords)
       const textPad = BRAND.titleDescriptionPadding * scale;
       const titleLineHeight = BRAND.titleSize * scale;
       const descLineHeight = BRAND.descriptionSize * scale * 1.3;
-      const gap = 50 * scale;
-      const blockHeight = titleLineHeight + gap + descLineHeight;
-      const blockTopY = (CANVAS_SIZE - blockHeight) / 2;
+      const titleTopExport = 313;
+      const gapExport = 64;
+      const titleTopY = titleTopExport * scale;
+      const gap = gapExport * scale;
 
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-
       const maxTextWidth = CANVAS_SIZE - textPad * 2;
 
-      ctx.font = `600 ${BRAND.titleSize * scale}px "Libre Franklin", sans-serif`;
-      ctx.fillStyle = "#1a1a1a";
-      let y = drawMultilineText(ctx, title, textPad, blockTopY, maxTextWidth, titleLineHeight);
+      const titleText = String(title ?? "");
+      const descText = String(description ?? "");
+
+      ctx.font = `600 ${BRAND.titleSize * scale}px system-ui, sans-serif`;
+      ctx.fillStyle = "#E8E3FF";
+      let y = drawMultilineText(ctx, titleText, textPad, titleTopY, maxTextWidth, titleLineHeight);
 
       y += gap;
-      ctx.font = `${BRAND.descriptionSize * scale}px "Libre Franklin", sans-serif`;
-      ctx.fillStyle = "rgba(26,26,26,0.85)";
-      drawMultilineText(ctx, description, textPad, y, maxTextWidth, descLineHeight);
+      ctx.font = `${BRAND.descriptionSize * scale}px system-ui, sans-serif`;
+      ctx.fillStyle = "#E8E3FF";
+      drawMultilineText(ctx, descText, textPad, y, maxTextWidth, descLineHeight);
+    };
 
+    // Run draw on next frame so we have the latest title/description after React commit
+    const raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
   }, [
     bgImage,
     logoImage,
@@ -140,14 +149,21 @@ export function PreviewCanvas() {
           height={CANVAS_SIZE}
           className="block"
         />
-        {isEmpty && (
+        {backgroundError ? (
+          <div
+            className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-red-600 bg-red-50/95"
+            role="alert"
+          >
+            {backgroundError}
+          </div>
+        ) : isEmpty ? (
           <div
             className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm text-gray-400"
             aria-hidden
           >
             Your hero visual will appear here
           </div>
-        )}
+        ) : null}
       </div>
       <p className="text-xs text-gray-500">Live preview • Export: 1080×1080</p>
     </div>
