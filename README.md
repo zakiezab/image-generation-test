@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Hero Visual Generator
+
+A brand-compliant platform for generating AI hero visuals. Create backgrounds with AI, add your logo and text, preview in real-time, and export production-ready 1080×1080 PNG images.
+
+## Features
+
+- **AI Background Generation** – Describe your hero visual, generate with OpenAI DALL-E (or placeholder when no API key)
+- **Logo Upload & Placement** – Upload logos, position (top-left, top-right, bottom-left, bottom-right), scale, and padding
+- **Title & Description** – Manual input or AI-generated copy
+- **Brand Enforcement** – Libre Franklin font, locked sizes, layout, and padding
+- **Live Preview** – Real-time canvas updates
+- **Export** – Server-side 1080×1080 PNG via Sharp
+
+## Tech Stack
+
+- **Next.js 16** (App Router)
+- **TypeScript**
+- **TailwindCSS**
+- **Zustand** (state)
+- **Sharp** (server-side export)
+- **HTML Canvas** (live preview)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+cp .env.example .env.local
+# Add OPENAI_API_KEY for AI image/text generation
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | OpenAI API key for DALL-E image generation and GPT text generation |
 
-## Learn More
+Without `OPENAI_API_KEY`, the app uses placeholder images (picsum.photos) and fallback text.
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── generate-image/   # AI background generation
+│   │   ├── generate-text/    # AI title/description
+│   │   ├── upload/           # Logo upload
+│   │   └── export/           # PNG export
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── background-generator.tsx
+│   ├── logo-upload.tsx
+│   ├── text-input.tsx
+│   ├── preview-canvas.tsx
+│   ├── export-button.tsx
+│   └── ui/
+├── lib/
+│   └── brand.ts              # Brand enforcement constants
+└── store/
+    └── hero-store.ts         # Zustand state
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Brand Rules (Enforced)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Font: Libre Franklin
+- Title size: 48px
+- Description size: 20px
+- Canvas: 1080×1080
+- Padding: 48px
+- Logo max: 200×80px
